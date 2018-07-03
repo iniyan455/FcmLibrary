@@ -1,9 +1,13 @@
 package iniyanarul.com.myfcm;
 
+import android.app.Activity;
+import android.content.Context;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
-
+import iniyanarul.com.myfcm.OntaskCompleted;
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
@@ -23,10 +27,20 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-public  class FcmMessage extends AppCompatActivity {
+public  class FcmMessage extends Activity  {
+    Context context;
+    OntaskCompleted ontaskCompleted;
 
 
-    public void sendNotification_toUser(String title, String message, String FirebaseId) {
+
+      
+    public FcmMessage(Context context, OntaskCompleted response) {
+        this.context = context;
+        this.ontaskCompleted = response;
+    }
+
+
+    public  void sendNotification_toUser(String title, String message, String FirebaseId) {
         try {
 
 
@@ -36,7 +50,7 @@ public  class FcmMessage extends AppCompatActivity {
             Log.e("Fire", "" + FirebaseId);
 
             RequestQueue requestQueue;
-            requestQueue = Volley.newRequestQueue(this);
+         requestQueue = Volley.newRequestQueue(this.context);
             String URL = "https://fcm.googleapis.com/fcm/send";
 
 
@@ -57,10 +71,12 @@ public  class FcmMessage extends AppCompatActivity {
                 @Override
                 public void onResponse(String response) {
 
+                    if (response != null) {
+                        ontaskCompleted.onSuccess(response);
+                    }
 
 
-
-                    Toast.makeText(FcmMessage.this, "Notification Send Successfully+" + response, Toast.LENGTH_LONG).show();
+              //   Toast.makeText(this.context, "Notification Send Successfully+" + response, Toast.LENGTH_LONG).show();
 
 
                 }
@@ -68,7 +84,9 @@ public  class FcmMessage extends AppCompatActivity {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     Log.e("VOLLEY", error.toString());
-                    Toast.makeText(getApplicationContext(), "" + error.toString(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(context, "" + error.toString(), Toast.LENGTH_SHORT).show();
+                    ontaskCompleted.onError( error.getMessage());
+
                 }
             }) {
 
@@ -110,7 +128,7 @@ public  class FcmMessage extends AppCompatActivity {
                 }
             };
 
-            requestQueue.add(stringRequest);
+           requestQueue.add(stringRequest);
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
@@ -119,5 +137,6 @@ public  class FcmMessage extends AppCompatActivity {
 
 
     }
+
 
 }
